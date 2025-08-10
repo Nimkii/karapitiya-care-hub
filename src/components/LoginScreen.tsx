@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,15 +16,16 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      if (username && password) {
+    try {
+      const success = await login(username, password);
+      
+      if (success) {
         toast({
           title: "Login Successful",
           description: "Welcome to Karapitiya Hospital Management System",
@@ -32,11 +34,19 @@ const LoginScreen = () => {
       } else {
         toast({
           title: "Login Failed",
-          description: "Please enter valid credentials",
+          description: "Invalid username or password",
           variant: "destructive",
         });
       }
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
